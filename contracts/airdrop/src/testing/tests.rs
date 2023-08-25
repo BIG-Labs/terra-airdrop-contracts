@@ -843,16 +843,16 @@ fn claim_terra_with_vested() {
     .collect::<Vec<Period>>();
 
     let bytes = Message::write_to_bytes(&vesting_msg).unwrap();
-
+    // changed the index here because first will create the vesting account then we'll send the initial vesting
     assert_eq!(
-        res.messages[0],
+        res.messages[1],
         SubMsg::new(CosmosMsg::Bank(BankMsg::Send {
             to_address: "terra1jh4th9u5zk4wa38wgtmxjmpsvwnsjevjqaz8h9".to_string(),
             amount: coins(100, "uluna")
         }))
     );
     assert_eq!(
-        res.messages[1],
+        res.messages[0],
         SubMsg::new(CosmosMsg::Stargate {
             type_url: "/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount".to_string(),
             value: Binary(bytes),

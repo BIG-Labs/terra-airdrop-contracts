@@ -87,18 +87,22 @@ pub fn create_vesting_account(
         .collect::<Vec<Period>>();
     let bytes = Message::write_to_bytes(&msg).unwrap();
     let mut msgs: Vec<CosmosMsg> = vec![];
-    if vested > 0 {
-        msgs.push(CosmosMsg::Bank(BankMsg::Send {
-            to_address: recipient.clone(),
-            amount: coins(vested, denom.clone()),
-        }))
-    }
+    
     if total_vesting > 0 {
         msgs.push(CosmosMsg::Stargate {
             type_url: "/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount".to_string(),
             value: Binary(bytes),
         });
     }
+
+    // moved this down because this will create an account on the blockchain letting the MsgCreatePeriodicVestingAccount fails
+    if vested > 0 {
+        msgs.push(CosmosMsg::Bank(BankMsg::Send {
+            to_address: recipient.clone(),
+            amount: coins(vested, denom.clone()),
+        }))
+    }
+
     if !refund_amount.is_zero() {
         msgs.push(CosmosMsg::Bank(BankMsg::Send {
             to_address: sender.clone(),
